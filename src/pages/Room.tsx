@@ -125,10 +125,10 @@ const Room: React.FC = () => {
 
     const copiarLink = () => {
         messageApi.open({
-          type: 'success',
-          content: 'link copiado com sucesso!',
+            type: 'success',
+            content: 'link copiado com sucesso!',
         });
-      };
+    };
 
     const fibonacciDeck = ['1', '2', '3', '5', '8', '13', '21', '34', '55', '89', '?', '∞'];
 
@@ -198,23 +198,42 @@ const Room: React.FC = () => {
                             >
                                 Convidar participantes
                             </Button>
+
+                            <Button
+                                type="default"
+                                danger
+                                onClick={() => {
+                                    setCurrentRoom('');
+                                    setVotos({});
+                                    setVotosRevelados(false);
+                                    setVotoAtual('');
+                                    setUsersInRoom([]);
+                                    connection?.invoke('SairSala', currentRoom, username);
+                                }}
+                                style={{
+                                    marginRight: '10px',
+                                    height: '36px',
+                                    lineHeight: '36px',
+                                    fontSize: '14px',
+                                    marginLeft: '10px',
+                                }}
+                            >
+                                Sair da sala
+                            </Button>
                         </div>
                     </div>
 
                     <div style={{ flex: '1 1 auto', padding: '20px 0' }}>
                         <Row gutter={[16, 16]} justify="center">
                             {usersInRoom.map((user) => (
-                                <Col xs={24} sm={12} md={5} lg={5} xl={5} key={user}>
+                                <Col xs={24} sm={12} md={3} lg={3} xl={3} key={user}>
                                     <Card
-                                        bordered
                                         hoverable
                                         style={{
                                             textAlign: 'center',
                                             borderColor: user === username ? '#1890ff' : '#d9d9d9',
                                             backgroundColor: votosRevelados && votos[user] ? '#f0f9ff' : '#fff',
-                                            minWidth: '100px',
                                         }}
-                                        bodyStyle={{ padding: '12px' }}
                                     >
                                         <div style={{ fontWeight: 'bold' }}>{user}</div>
                                         <div
@@ -225,16 +244,45 @@ const Room: React.FC = () => {
                                             }}
                                         >
                                             {votosRevelados
-                                                ? votos[user] || '---'
+                                                ? votos[user]
                                                 : votos[user]
-                                                    ? '✅'
-                                                    : '❌'}
+                                                    ? '✅' : '❌'}
                                         </div>
                                     </Card>
                                 </Col>
                             ))}
                         </Row>
                     </div>
+
+                    {votosRevelados && (
+                        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                            {(() => {
+                                const fibonacci = [1, 2, 3, 5, 8, 13, 21, 34, 55, 89];
+                                const numeros = Object.values(votos)
+                                    .map(v => parseInt(v))
+                                    .filter(v => !isNaN(v));
+
+                                if (numeros.length === 0) return null;
+
+                                const media = numeros.reduce((a, b) => a + b, 0) / numeros.length;
+
+                                const aproximada = fibonacci.reduce((prev, curr) =>
+                                    Math.abs(curr - media) < Math.abs(prev - media) ? curr : prev
+                                );
+
+                                return (
+                                    <>
+                                        <div style={{ fontSize: '18px', fontWeight: 'bold' }}>
+                                            Média aproximada: {aproximada}
+                                        </div>
+                                        <div style={{ fontSize: '14px', color: '#999' }}>
+                                            Média exata: {media.toFixed(2)}
+                                        </div>
+                                    </>
+                                );
+                            })()}
+                        </div>
+                    )}
 
                     {username === donoSala && (
                         <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '20px' }}>
