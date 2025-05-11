@@ -2,26 +2,26 @@ import Layout, { Content } from 'antd/es/layout/layout';
 import React from 'react';
 
 interface PanelContainerProps {
-    children: React.ReactNode | [React.ReactNode, React.ReactNode];
+    children: React.ReactNode;
 }
 
 const PanelContainer: React.FC<PanelContainerProps> = ({ children }) => {
-    const containerClass = 'panel-container row';
-    const leftClass = `panel-left desktop`;
-
     return (
         <Layout
-            style={{
-                width: '100vw',
-                minHeight: '100vh',
-                background: '#ffffff',
-            }}
+            style={{ background: '#ffffff' }}
         >
-            <Content style={{ height: '100vh' }}>
-                <div className={containerClass}>
-                    <div className={leftClass}>
-                        {children}
-                    </div>
+            <Content style={{ width: '100vw', height: '100vh' }}>
+                <div style={{
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    boxSizing: 'border-box',
+                    overflow: 'hidden'
+                }}>
+                    {children}
                 </div>
             </Content>
         </Layout>
