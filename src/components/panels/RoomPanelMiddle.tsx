@@ -21,7 +21,9 @@ const RoomPanelMiddle: React.FC<RoomPanelMiddleProps> = ({
         <>
             <Row gutter={[16, 16]} justify="center">
                 {usersInRoom.map((user) => (
-                    <Col xs={24} sm={12} md={3} lg={3} xl={3} key={user}>
+                    <Col xs={24} sm={12} md={3} lg={3} xl={3} key={user}
+                        style={{ display: 'flex', justifyContent: 'center' }}
+                    >
                         <UserCard
                             votos={votos}
                             votosRevelados={votosRevelados}

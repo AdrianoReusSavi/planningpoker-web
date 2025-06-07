@@ -46,7 +46,7 @@ const RoomPanelBottom: React.FC<RoomPanelBottomProps> = ({
                     gap: '8px',
                     position: 'absolute',
                     textAlign: 'center',
-                    bottom: '150px',
+                    bottom: '200%',
                     width: '100%',
                     zIndex: 1
                 }}>
@@ -83,7 +83,7 @@ const RoomPanelBottom: React.FC<RoomPanelBottomProps> = ({
                 justifyContent: 'center',
                 gap: '8px',
                 position: 'absolute',
-                bottom: '100px',
+                bottom: '120%',
                 width: '100%',
                 zIndex: 1
             }}>
