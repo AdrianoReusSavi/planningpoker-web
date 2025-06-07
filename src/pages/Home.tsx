@@ -25,6 +25,32 @@ const Home: React.FC = () => {
         };
     }, [connection]);
 
+    useEffect(() => {
+        if (!connection) return;
+
+        const interval = setInterval(() => {
+            if (connection.state === "Connected") {
+                connection.invoke("Ping").catch(err => {
+                console.error("Ping? ", err);
+            });
+            }
+        }, 30000);
+
+        return () => clearInterval(interval);
+    }, [connection]);
+
+    useEffect(() => {
+        if (!connection) return;
+
+        connection.on("Pong", () => {
+            console.log("Pong");
+        });
+
+        return () => {
+            connection.off("Pong");
+        };
+    }, [connection]);
+
     return (
         <PanelContainer>
             {!isRoom ? (
