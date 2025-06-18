@@ -9,6 +9,16 @@ interface UserCardProps {
 }
 
 const UserCard: React.FC<UserCardProps> = ({ flipped, username, vote, color }) => {
+    const baseImgStyle = {
+        position: 'absolute' as const,
+        width: '100%',
+        height: '100%',
+        top: 0,
+        left: 0,
+        backfaceVisibility: 'hidden' as const,
+        userSelect: 'none' as const,
+    };
+
     return (
         <div style={{
             display: 'flex',
@@ -48,21 +58,40 @@ const UserCard: React.FC<UserCardProps> = ({ flipped, username, vote, color }) =
                         position: 'absolute',
                         backfaceVisibility: 'hidden'
                     }}>
-                        <Card style={{
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            width: '80px',
-                            height: '110px',
-                            fontSize: '32px',
-                            border: `1.5px solid ${color}`,
-                            boxShadow: `0 2px 5px ${color}`
-                        }}>
-                            {vote ?
-                                <CheckOutlined style={{ color: 'green' }} /> :
-                                <CloseOutlined style={{ color: 'red' }} />
-                            }
-                        </Card>
+                        {vote ?
+                            <CheckOutlined
+                                style={{
+                                    color: 'black',
+                                    position: 'absolute',
+                                    top: '50%',
+                                    left: '50%',
+                                    transform: 'translate(-50%, -50%)',
+                                    fontSize: 32,
+                                    zIndex: 1
+                                }}
+                            />
+                            :
+                            <CloseOutlined
+                                style={{
+                                    color: 'black',
+                                    position: 'absolute',
+                                    top: '50%',
+                                    left: '50%',
+                                    transform: 'translate(-50%, -50%)',
+                                    fontSize: 32,
+                                    zIndex: 1
+                                }}
+                            />
+                        }
+                        <svg
+                            width="253"
+                            height="348"
+                            viewBox="0 0 253 348"
+                            style={{ ...baseImgStyle, color }}
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
+                            <rect width="253" height="348" rx="40" fill="currentColor" />
+                        </svg>
                     </div>
                     <div style={{
                         width: '100%',
@@ -71,17 +100,26 @@ const UserCard: React.FC<UserCardProps> = ({ flipped, username, vote, color }) =
                         backfaceVisibility: 'hidden',
                         transform: 'rotateY(180deg)'
                     }}>
-                        <Card style={{
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            width: '80px',
-                            height: '110px',
-                            border: `1.5px solid ${color}`,
-                            boxShadow: `0 2px 5px ${color}`
+                        <div style={{
+                            color: 'black',
+                            position: 'absolute',
+                            zIndex: 1,
+                            fontSize: 32,
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)',
                         }}>
-                            <div style={{ fontSize: "32px" }}>{vote}</div>
-                        </Card>
+                            {vote}
+                        </div>
+                        <svg
+                            width="253"
+                            height="348"
+                            viewBox="0 0 253 348"
+                            style={{ ...baseImgStyle, color }}
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
+                            <rect width="253" height="348" rx="40" fill="none" stroke="currentColor" strokeWidth="7" />
+                        </svg>
                     </div>
                 </div>
             </div>
