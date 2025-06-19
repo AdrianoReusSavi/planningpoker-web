@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
+import { message } from 'antd';
 import * as signalR from '@microsoft/signalr';
 
 const ConnectionContext = createContext<{
@@ -10,6 +11,7 @@ const ConnectionContext = createContext<{
 let connection: signalR.HubConnection | null = null;
 
 export const ConnectionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const [messageApi, contextHolder] = message.useMessage();
     const [connected, setConnected] = useState(false);
     const [onRoom, setOnRoom] = useState(false);
 
@@ -24,8 +26,9 @@ export const ConnectionProvider: React.FC<{ children: React.ReactNode }> = ({ ch
             connection.onclose(() => setConnected(false));
             connection.onreconnected(() => setConnected(true));
             connection.on("OnRoom", (flag) => {
-                console.log("Evento OnRoom recebido:", flag);
                 setOnRoom(flag);
+                if (!flag)
+                    messageApi.open({ type: 'error', content: 'Sala não encontrada!' });
             });
 
 
@@ -38,6 +41,7 @@ export const ConnectionProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
     return (
         <ConnectionContext.Provider value={{ connection, connected, onRoom }}>
+            {contextHolder}
             {children}
         </ConnectionContext.Provider>
     );
