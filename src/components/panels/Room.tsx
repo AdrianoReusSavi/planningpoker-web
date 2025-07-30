@@ -6,6 +6,7 @@ import UserGroup from "../ui/room/UserGroup";
 import VoteSummary from "../ui/room/VoteSummary";
 import ControlButtons from "../ui/room/ControlButtons";
 import VotingDeck from "../ui/room/VotingDeck";
+import estimationOptions from '../../constants/estimationOptions';
 
 interface RoomProps { }
 
@@ -23,12 +24,11 @@ const Room: React.FC<RoomProps> = () => {
 
     const [roomName, setRoomName] = useState("");
     const [roomId, setRoomId] = useState("");
+    const [votingDeck, setVotingDeck] = useState<number>(0);
     const [group, setGroup] = useState<User[]>([]);
     const [isLeader, setIsLeader] = useState(false);
     const [isWatching, setIsWatching] = useState(false);
     const allVoted = group.every((user) => user.vote?.length > 0);
-
-    const fibonacciDeck = ["1", "2", "3", "5", "8", "13", "21", "34", "55", "89", "?", "∞"];
 
     useEffect(() => {
         if (!connection || !connected) return;
@@ -38,21 +38,11 @@ const Room: React.FC<RoomProps> = () => {
     useEffect(() => {
         if (!connection || !connected) return;
 
-        connection.on("RoomSettings", (roomId: string, roomName: string) => {
-            setRoomId(roomId);
-            setRoomName(roomName);
-        });
-
-        return () => connection.off("RoomSettings");
-    }, [connection, connected]);
-
-    useEffect(() => {
-        if (!connection || !connected) return;
-
         const handleGroup = (group: User[]) => setGroup(group);
-        const handleSettings = (roomId: string, roomName: string, isLeader: boolean, isWatching: boolean) => {
+        const handleSettings = (roomId: string, roomName: string, votingDeck: number, isLeader: boolean, isWatching: boolean) => {
             setRoomId(roomId);
             setRoomName(roomName);
+            setVotingDeck(votingDeck);
             setIsLeader(isLeader);
             setIsWatching(isWatching);
         };
@@ -118,7 +108,7 @@ const Room: React.FC<RoomProps> = () => {
                         <Header roomName={roomName} roomId={roomId} copiarLink={copiarLink} leaveRoom={leaveRoom} />
                         <UserGroup group={group} flipped={flipped} />
 
-                        {isWatching ? (
+                        {!isWatching ? (
                             <>
                                 <div
                                     style={{
@@ -130,7 +120,7 @@ const Room: React.FC<RoomProps> = () => {
                                         alignItems: "center",
                                     }}
                                 >
-                                    <VoteSummary flipped={flipped} allVoted={allVoted} group={group} />
+                                    <VoteSummary flipped={flipped} allVoted={allVoted} group={group} votingDeck={estimationOptions[votingDeck].list} />
                                     <ControlButtons
                                         isLeader={isLeader}
                                         flipped={flipped}
@@ -139,7 +129,7 @@ const Room: React.FC<RoomProps> = () => {
                                         resetVotes={resetVotes}
                                     />
                                 </div>
-                                <VotingDeck fibonacciDeck={fibonacciDeck} vote={vote} setVote={setVote} flipped={flipped} />
+                                <VotingDeck votingDeck={estimationOptions[votingDeck].list} vote={vote} setVote={setVote} flipped={flipped} />
                             </>
                         ) : (<></>)}
                     </div>

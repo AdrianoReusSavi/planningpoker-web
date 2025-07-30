@@ -2,13 +2,13 @@ import { Col, Row } from "antd";
 import ActionCard from "../cards/ActionCard";
 
 interface VotingDeckProps {
-    fibonacciDeck: string[];
+    votingDeck: string[];
     vote: string;
     setVote: React.Dispatch<React.SetStateAction<string>>;
     flipped: boolean;
 }
 
-const VotingDeck: React.FC<VotingDeckProps> = ({ fibonacciDeck, vote, setVote, flipped }) => (
+const VotingDeck: React.FC<VotingDeckProps> = ({ votingDeck, vote, setVote, flipped }) => (
     <div
         style={{
             width: "100%",
@@ -19,7 +19,7 @@ const VotingDeck: React.FC<VotingDeckProps> = ({ fibonacciDeck, vote, setVote, f
         }}
     >
         <Row justify="center">
-            {fibonacciDeck.map((card) => (
+            {votingDeck.map((card) => (
                 <Col key={card} style={{ display: "flex", justifyContent: "center" }}>
                     <ActionCard value={card} vote={vote} setVote={setVote} disabled={flipped} />
                 </Col>
