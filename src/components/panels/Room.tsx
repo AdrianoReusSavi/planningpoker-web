@@ -14,6 +14,7 @@ interface User {
     connectionId: string;
     username: string;
     vote: string;
+    flipped: boolean;
 }
 
 const Room: React.FC<RoomProps> = () => {
@@ -39,28 +40,33 @@ const Room: React.FC<RoomProps> = () => {
         if (!connection || !connected) return;
 
         const handleGroup = (group: User[]) => setGroup(group);
-        const handleSettings = (roomId: string, roomName: string, votingDeck: number, isLeader: boolean, isWatching: boolean) => {
+        const handleSettings = (roomId: string, roomName: string, votingDeck: number, votesRevealed: boolean) => {
             setRoomId(roomId);
             setRoomName(roomName);
             setVotingDeck(votingDeck);
-            setIsLeader(isLeader);
-            setIsWatching(isWatching);
+            setFlipped(votesRevealed);
+            if (!votesRevealed)
+                setVote("");
         };
-        const handleVotesRevealed = (reveal: boolean) => {
-            setFlipped(reveal);
-            if (!reveal) setVote("");
+        const handleLeader = (isLeader: boolean) => {
+            setIsLeader(isLeader);
+        };
+        const handleWatching = (isWatching: boolean) => {
+            setIsWatching(isWatching);
         };
 
         connection.on("GetGroup", handleGroup);
+        connection.on("GetLeader", handleLeader);
+        connection.on("GetWatching", handleWatching);
         connection.on("RoomSettings", handleSettings);
-        connection.on("VotesRevealed", handleVotesRevealed);
 
         connection.invoke("GetRoomSettings");
 
         return () => {
             connection.off("GetGroup", handleGroup);
+            connection.off("GetLeader", handleLeader);
+            connection.off("GetWatching", handleWatching);
             connection.off("RoomSettings", handleSettings);
-            connection.off("VotesRevealed", handleVotesRevealed);
         };
     }, [connection, connected]);
 

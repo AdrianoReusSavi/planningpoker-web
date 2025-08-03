@@ -5,6 +5,7 @@ interface User {
     connectionId: string;
     username: string;
     vote: string;
+    flipped: boolean;
 }
 
 interface UserGroupProps {
@@ -31,7 +32,7 @@ const UserGroup: React.FC<UserGroupProps> = ({ group, flipped }) => {
             <Row justify="center">
                 {group.map((user, idx) => (
                     <Col key={user.username ?? idx} style={{ display: "flex", justifyContent: "center" }}>
-                        <UserCard flipped={flipped} username={user.username} vote={user.vote} color={getRainbowColor(idx, group.length)} />
+                        <UserCard flipped={user.flipped && flipped} username={user.username} vote={user.vote} color={getRainbowColor(idx, group.length)} />
                     </Col>
                 ))}
             </Row>
