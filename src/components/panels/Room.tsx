@@ -7,6 +7,7 @@ import VoteSummary from "../ui/room/VoteSummary";
 import ControlButtons from "../ui/room/ControlButtons";
 import VotingDeck from "../ui/room/VotingDeck";
 import estimationOptions from '../../constants/estimationOptions';
+import { Fireworks } from "../ui/gif/Fireworks";
 
 interface RoomProps { }
 
@@ -30,6 +31,7 @@ const Room: React.FC<RoomProps> = () => {
     const [isLeader, setIsLeader] = useState(false);
     const [isWatching, setIsWatching] = useState(false);
     const allVoted = group.every((user) => user.vote?.length > 0);
+    const sameVote = group.filter(u => u.vote !== undefined).length > 1 && group.every(u => u.vote === group[0].vote);
 
     useEffect(() => {
         if (!connection || !connected) return;
@@ -113,6 +115,8 @@ const Room: React.FC<RoomProps> = () => {
                     >
                         <Header roomName={roomName} roomId={roomId} copiarLink={copiarLink} leaveRoom={leaveRoom} />
                         <UserGroup group={group} flipped={flipped} />
+
+                        {flipped && allVoted && sameVote ? (<Fireworks />) : (<></>)}
 
                         {!isWatching ? (
                             <>
