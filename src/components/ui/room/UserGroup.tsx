@@ -2,18 +2,18 @@ import { Col, Row } from "antd";
 import UserCard from "../cards/UserCard";
 
 interface User {
-    connectionId: string;
-    username: string;
-    vote: string;
-    flipped: boolean;
+    ConnectionId: string;
+    Username: string;
+    Vote: string;
+    Flipped: boolean;
 }
 
 interface UserGroupProps {
-    group: User[];
-    flipped: boolean;
+    Group: User[];
+    Flipped: boolean;
 }
 
-const UserGroup: React.FC<UserGroupProps> = ({ group, flipped }) => {
+const UserGroup: React.FC<UserGroupProps> = ({ Group, Flipped }) => {
     function getRainbowColor(index: number, total: number): string {
         const hue = (index / total) * 360;
         return `hsla(${hue}, 100%, 50%, 0.5)`;
@@ -30,9 +30,9 @@ const UserGroup: React.FC<UserGroupProps> = ({ group, flipped }) => {
             }}
         >
             <Row justify="center">
-                {group.map((user, idx) => (
-                    <Col key={user.username ?? idx} style={{ display: "flex", justifyContent: "center" }}>
-                        <UserCard flipped={user.flipped && flipped} username={user.username} vote={user.vote} color={getRainbowColor(idx, group.length)} />
+                {Group.map((user, idx) => (
+                    <Col key={user.Username ?? idx} style={{ display: "flex", justifyContent: "center" }}>
+                        <UserCard flipped={user.Flipped && Flipped} username={user.Username} vote={user.Vote} color={getRainbowColor(idx, Group.length)} />
                     </Col>
                 ))}
             </Row>

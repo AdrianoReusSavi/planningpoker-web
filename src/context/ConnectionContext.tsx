@@ -1,46 +1,52 @@
-import { createContext, useContext, useEffect, useState } from 'react';
-import { message } from 'antd';
-import * as signalR from '@microsoft/signalr';
+import { createContext, useContext, useEffect, useState, useRef } from "react";
+import { message } from "antd";
 
-const ConnectionContext = createContext<{
-    connection: signalR.HubConnection | null;
+interface ConnectionContextType {
+    ws: WebSocket | null;
     connected: boolean;
     onRoom: boolean;
-}>({ connection: null, connected: false, onRoom: false });
+}
 
-let connection: signalR.HubConnection | null = null;
+const ConnectionContext = createContext<ConnectionContextType>({
+    ws: null,
+    connected: false,
+    onRoom: false
+});
 
 export const ConnectionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [messageApi, contextHolder] = message.useMessage();
     const [connected, setConnected] = useState(false);
     const [onRoom, setOnRoom] = useState(false);
+    const wsRef = useRef<WebSocket | null>(null);
 
     useEffect(() => {
-        if (!connection) {
-            connection = new signalR.HubConnectionBuilder()
-                .withUrl(import.meta.env.VITE_SIGNALR_URL)
-                .withAutomaticReconnect({ nextRetryDelayInMilliseconds: () => 3000 })
-                .configureLogging(signalR.LogLevel.Information)
-                .build();
+        const ws = new WebSocket(import.meta.env.VITE_WS_URL);
+        wsRef.current = ws;
 
-            connection.onclose(() => setConnected(false));
-            connection.onreconnected(() => setConnected(true));
-            connection.on("OnRoom", (flag) => {
-                setOnRoom(flag);
-                if (!flag)
-                    messageApi.open({ type: 'error', content: 'Sala não encontrada!' });
-            });
+        ws.onopen = () => setConnected(true);
+        ws.onclose = () => setConnected(false);
 
+        ws.onmessage = (event) => {
+            const msg = JSON.parse(event.data);
+            switch (msg.action) {
+                case "OnRoom":
+                    setOnRoom(msg.success);
+                    if (!msg.success) {
+                        if (msg.message) 
+                            messageApi.open({ type: "error", content: msg.message });
+                        sessionStorage.clear();
+                    }
+                    break;
+            }
+        };
 
-            connection
-                .start()
-                .then(() => setConnected(true))
-                .catch(console.error);
-        }
+        return () => {
+            ws.close();
+        };
     }, []);
 
     return (
-        <ConnectionContext.Provider value={{ connection, connected, onRoom }}>
+        <ConnectionContext.Provider value={{ ws: wsRef.current, connected, onRoom }}>
             {contextHolder}
             {children}
         </ConnectionContext.Provider>

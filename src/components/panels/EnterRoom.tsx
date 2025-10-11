@@ -7,31 +7,27 @@ interface EnterRoomProps {
 }
 
 const EnterRoom: React.FC<EnterRoomProps> = ({ roomId }) => {
-    const { connection } = useConnection();
+    const { ws } = useConnection();
     const [username, setUsername] = useState<string>('');
 
     useEffect(() => {
-        if (username) {
-            localStorage.setItem('username', username);
-        }
+        if (username) localStorage.setItem('username', username);
     }, [username]);
 
     useEffect(() => {
         const savedUsername = localStorage.getItem('username');
-        if (savedUsername)
-            setUsername(savedUsername);
+        if (savedUsername) setUsername(savedUsername);
     }, []);
 
-    const enterRoom = async () => {
-        if (!connection || !username || !roomId) return;
-
-        await connection.invoke('EnterRoom', roomId, username);
+    const enterRoom = () => {
+        if (!ws || !username || !roomId || ws.readyState !== WebSocket.OPEN) return;
+        const userId = sessionStorage.getItem('userId');
+        ws.send(JSON.stringify({ Action: 'EnterRoom', RoomId: roomId, Username: username, UserId: userId }));
     };
 
-    const watchRoom = async () => {
-        if (!connection || !username || !roomId) return;
-
-        await connection.invoke('WatchRoom', roomId, username);
+    const backRoom = () => {
+        const url = window.location.origin + window.location.pathname;
+        window.location.href = url;
     };
 
     return (
@@ -51,22 +47,20 @@ const EnterRoom: React.FC<EnterRoomProps> = ({ roomId }) => {
             <div style={{ display: 'flex' }}>
                 <Button
                     block
-                    color="primary"
-                    variant="solid"
+                    type="primary"
                     onClick={enterRoom}
-                    style={{ marginRight: "20px" }}
-                    disabled={!roomId || !username || !connection}
+                    style={{ marginRight: '20px' }}
+                    disabled={!roomId || !username || !ws || ws.readyState !== WebSocket.OPEN}
                 >
-                    Entrar na Sala
+                    Entrar na sala
                 </Button>
                 <Button
                     block
-                    color="cyan"
+                    color="magenta"
                     variant="solid"
-                    onClick={watchRoom}
-                    disabled={!roomId || !username || !connection}
+                    onClick={backRoom}
                 >
-                    Assistir
+                    Voltar
                 </Button>
             </div>
         </div>
