@@ -3,25 +3,31 @@ import { useEffect, useState } from "react";
 import { useConnection } from "../../context/ConnectionContext";
 import estimationOptions from '../../constants/estimationOptions';
 
-const CreateRoom: React.FC = () => {
-    const { ws, connected } = useConnection();
+interface CreateRoomProps {
+}
+
+const CreateRoom: React.FC<CreateRoomProps> = ({ }) => {
+    const { connection } = useConnection();
     const [username, setUsername] = useState<string>('');
     const [roomName, setRoomName] = useState<string>('');
     const [votingDeck, setVotingDeck] = useState<number>(0);
 
     useEffect(() => {
-        const savedUsername = localStorage.getItem('username');
-        if (savedUsername) setUsername(savedUsername);
-    }, []);
-
-    useEffect(() => {
-        if (username) localStorage.setItem('username', username);
+        if (username) {
+            localStorage.setItem('username', username);
+        }
     }, [username]);
 
-    const createRoom = () => {
-        if (!ws || !connected || !username || !roomName) return;
-        const userId = sessionStorage.getItem('userId');
-        ws.send(JSON.stringify({ Action: "CreateRoom", Username: username, UserId: userId, RoomName: roomName, VotingDeck: votingDeck }));
+    useEffect(() => {
+        const savedUsername = localStorage.getItem('username');
+        if (savedUsername)
+            setUsername(savedUsername);
+    }, []);
+
+    const createRoom = async () => {
+        if (!connection || !username || !roomName) return;
+
+        await connection.invoke("CreateRoom", username, roomName, votingDeck);
     };
 
     return (
@@ -57,7 +63,7 @@ const CreateRoom: React.FC = () => {
                 type="primary"
                 block
                 onClick={createRoom}
-                disabled={!username || !roomName || !connected}
+                disabled={!username || !roomName || !connection}
             >
                 Criar Sala
             </Button>

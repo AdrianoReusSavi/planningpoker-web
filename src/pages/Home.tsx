@@ -14,7 +14,7 @@ const Home: React.FC = () => {
     useEffect(() => {
         const param = new URLSearchParams(window.location.search).get('roomId');
         if (param) setRoomId(param);
-    }, [onRoom]);
+    }, []);
 
     return (
         <>

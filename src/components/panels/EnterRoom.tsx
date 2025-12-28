@@ -7,27 +7,31 @@ interface EnterRoomProps {
 }
 
 const EnterRoom: React.FC<EnterRoomProps> = ({ roomId }) => {
-    const { ws } = useConnection();
+    const { connection } = useConnection();
     const [username, setUsername] = useState<string>('');
 
     useEffect(() => {
-        if (username) localStorage.setItem('username', username);
+        if (username) {
+            localStorage.setItem('username', username);
+        }
     }, [username]);
 
     useEffect(() => {
         const savedUsername = localStorage.getItem('username');
-        if (savedUsername) setUsername(savedUsername);
+        if (savedUsername)
+            setUsername(savedUsername);
     }, []);
 
-    const enterRoom = () => {
-        if (!ws || !username || !roomId || ws.readyState !== WebSocket.OPEN) return;
-        const userId = sessionStorage.getItem('userId');
-        ws.send(JSON.stringify({ Action: 'EnterRoom', RoomId: roomId, Username: username, UserId: userId }));
+    const enterRoom = async () => {
+        if (!connection || !username || !roomId) return;
+
+        await connection.invoke('EnterRoom', roomId, username);
     };
 
-    const backRoom = () => {
-        const url = window.location.origin + window.location.pathname;
-        window.location.href = url;
+    const watchRoom = async () => {
+        if (!connection || !username || !roomId) return;
+
+        await connection.invoke('WatchRoom', roomId, username);
     };
 
     return (
@@ -47,20 +51,22 @@ const EnterRoom: React.FC<EnterRoomProps> = ({ roomId }) => {
             <div style={{ display: 'flex' }}>
                 <Button
                     block
-                    type="primary"
+                    color="primary"
+                    variant="solid"
                     onClick={enterRoom}
-                    style={{ marginRight: '20px' }}
-                    disabled={!roomId || !username || !ws || ws.readyState !== WebSocket.OPEN}
+                    style={{ marginRight: "20px" }}
+                    disabled={!roomId || !username || !connection}
                 >
-                    Entrar na sala
+                    Entrar na Sala
                 </Button>
                 <Button
                     block
-                    color="magenta"
+                    color="cyan"
                     variant="solid"
-                    onClick={backRoom}
+                    onClick={watchRoom}
+                    disabled={!roomId || !username || !connection}
                 >
-                    Voltar
+                    Assistir
                 </Button>
             </div>
         </div>
