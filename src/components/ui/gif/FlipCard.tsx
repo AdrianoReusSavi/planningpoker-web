@@ -11,7 +11,9 @@ const FlipCard: React.FC = () => {
   const [showingNarwhal, setShowingNarwhal] = useState(true);
   const intervalRef = useRef<number | null>(null);
 
-  const flipCard = () => {
+  const flipCard = useRef(() => {});
+
+  flipCard.current = () => {
     if (flipping) return;
     setFlipping(true);
     setAngle((prev) => prev + 180);
@@ -33,7 +35,7 @@ const FlipCard: React.FC = () => {
 
   useEffect(() => {
     if (!intervalRef.current) {
-      intervalRef.current = window.setInterval(flipCard, 1200);
+      intervalRef.current = window.setInterval(() => flipCard.current(), 1200);
     }
     const handleVisibility = () => {
       if (document.visibilityState === 'visible') {

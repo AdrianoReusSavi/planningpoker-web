@@ -1,6 +1,7 @@
 interface User {
-    connectionId: string;
+    id: string;
     username: string;
+    hasVoted: boolean;
     vote: string;
 }
 

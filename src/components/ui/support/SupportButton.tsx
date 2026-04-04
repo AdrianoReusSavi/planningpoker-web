@@ -2,10 +2,7 @@ import { useState } from 'react';
 import { FloatButton, Modal, Button, QRCode, message } from 'antd';
 import { HeartOutlined } from '@ant-design/icons';
 
-interface SupportButtonProps {
-}
-
-const SupportButton: React.FC<SupportButtonProps> = ({ }) => {
+const SupportButton: React.FC = () => {
     const [open, setOpen] = useState(false);
     const [messageApi, contextHolder] = message.useMessage();
     const chavePix = import.meta.env.VITE_CHAVE_PIX;
@@ -27,7 +24,7 @@ const SupportButton: React.FC<SupportButtonProps> = ({ }) => {
                 type: 'success',
                 content: 'Chave PIX copiada com sucesso!',
             });
-        } catch { }
+        } catch { /* clipboard fallback may fail silently */ }
     };
 
     return (

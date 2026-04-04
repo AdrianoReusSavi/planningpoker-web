@@ -1,16 +1,17 @@
-import { Button, Input, Select, Space } from "antd";
+import { Button, Input, message, Select, Space } from "antd";
 import { useEffect, useState } from "react";
 import { useConnection } from "../../context/ConnectionContext";
+import { useRoom } from "../../context/RoomContext";
 import estimationOptions from '../../constants/estimationOptions';
 
-interface CreateRoomProps {
-}
-
-const CreateRoom: React.FC<CreateRoomProps> = ({ }) => {
-    const { connection } = useConnection();
+const CreateRoom: React.FC = () => {
+    const [messageApi, contextHolder] = message.useMessage();
+    const { connection, connected } = useConnection();
+    const { setPlayerId } = useRoom();
     const [username, setUsername] = useState<string>('');
     const [roomName, setRoomName] = useState<string>('');
     const [votingDeck, setVotingDeck] = useState<number>(0);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         if (username) {
@@ -27,15 +28,29 @@ const CreateRoom: React.FC<CreateRoomProps> = ({ }) => {
     const createRoom = async () => {
         if (!connection || !username || !roomName) return;
 
-        await connection.invoke("CreateRoom", username, roomName, votingDeck);
+        setLoading(true);
+        try {
+            const playerId = await connection.invoke<string>("CreateRoom", username, roomName, votingDeck);
+            if (playerId) {
+                setPlayerId(playerId);
+            } else {
+                messageApi.error("Falha ao criar sala. Tente novamente.");
+            }
+        } catch {
+            messageApi.error("Erro de conexao. Verifique sua internet e tente novamente.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
         <div>
+            {contextHolder}
             <Input
                 placeholder="Seu nome"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
+                onPressEnter={createRoom}
                 style={{ marginBottom: '10px' }}
             />
             <Input
@@ -43,6 +58,7 @@ const CreateRoom: React.FC<CreateRoomProps> = ({ }) => {
                 maxLength={20}
                 value={roomName}
                 onChange={(e) => setRoomName(e.target.value)}
+                onPressEnter={createRoom}
                 style={{ marginBottom: '10px' }}
             />
 
@@ -63,7 +79,8 @@ const CreateRoom: React.FC<CreateRoomProps> = ({ }) => {
                 type="primary"
                 block
                 onClick={createRoom}
-                disabled={!username || !roomName || !connection}
+                loading={loading}
+                disabled={!username || !roomName || !connected}
             >
                 Criar Sala
             </Button>

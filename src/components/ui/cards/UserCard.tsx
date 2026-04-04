@@ -1,130 +1,209 @@
 import { Tooltip } from "antd";
-import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
+import { CheckOutlined, CloseOutlined, CrownOutlined } from '@ant-design/icons';
 
 interface UserCardProps {
     flipped: boolean;
+    revealDelay?: number;
     username: string;
+    hasVoted: boolean;
     vote: string;
+    connected: boolean;
     color: string;
+    isOwner?: boolean;
+    canKick?: boolean;
+    onKick?: () => void;
+    canTransfer?: boolean;
+    onTransfer?: () => void;
 }
 
-const UserCard: React.FC<UserCardProps> = ({ flipped, username, vote, color }) => {
-    const baseImgStyle = {
-        position: 'absolute' as const,
+const UserCard: React.FC<UserCardProps> = ({ flipped, revealDelay = 0, username, hasVoted, vote, connected, color, isOwner, canKick, onKick, canTransfer, onTransfer }) => {
+    const statusText = !connected
+        ? 'desconectado'
+        : hasVoted
+        ? 'votou'
+        : 'aguardando voto';
+
+    const faceBase: React.CSSProperties = {
+        position: 'absolute',
         width: '100%',
         height: '100%',
-        top: 0,
-        left: 0,
-        backfaceVisibility: 'hidden' as const,
-        userSelect: 'none' as const,
+        borderRadius: '10px',
+        backfaceVisibility: 'hidden',
+        overflow: 'hidden',
     };
 
     return (
-        <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            margin: '10px',
-        }}>
-            <div style={{
-                fontWeight: "bold",
-                fontSize: "12px",
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                maxWidth: "80px",
-            }}>
-                <Tooltip title={username}>
-                    {username}
-                </Tooltip>
-            </div>
-            <div style={{
-                width: '80px',
-                height: '110px',
+        <div
+            role="article"
+            aria-label={`${username} - ${statusText}${flipped && vote ? `, voto: ${vote}` : ''}`}
+            style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '7px',
+                margin: '8px 6px',
                 position: 'relative',
-                transformStyle: 'preserve-3d',
-                transition: 'transform 0.6s',
-                transform: flipped ? 'rotateY(180deg)' : 'none'
-            }}>
-                <div style={{
-                    width: '100%',
-                    height: '100%',
-                    position: 'absolute',
-                    transformStyle: 'preserve-3d'
-                }}>
-                    <div style={{
-                        width: '100%',
-                        height: '100%',
-                        position: 'absolute',
-                        backfaceVisibility: 'hidden'
-                    }}>
-                        {vote ?
-                            <CheckOutlined
-                                style={{
-                                    color: 'black',
-                                    position: 'absolute',
-                                    top: '50%',
-                                    left: '50%',
-                                    transform: 'translate(-50%, -50%)',
-                                    fontSize: 32,
-                                    zIndex: 1
-                                }}
-                            />
-                            :
-                            <CloseOutlined
-                                style={{
-                                    color: 'black',
-                                    position: 'absolute',
-                                    top: '50%',
-                                    left: '50%',
-                                    transform: 'translate(-50%, -50%)',
-                                    fontSize: 32,
-                                    zIndex: 1
-                                }}
-                            />
-                        }
-                        <svg
-                            width="253"
-                            height="348"
-                            viewBox="0 0 253 348"
-                            style={{ ...baseImgStyle, color }}
-                            xmlns="http://www.w3.org/2000/svg"
-                        >
-                            <rect width="253" height="348" rx="40" fill="currentColor" />
-                        </svg>
+            }}
+        >
+            {/* Transfer ownership button */}
+            {canTransfer && (
+                <Tooltip title={`Transferir lideranca para ${username}`}>
+                    <div
+                        role="button"
+                        tabIndex={0}
+                        aria-label={`Transferir lideranca para ${username}`}
+                        onClick={(e) => { e.stopPropagation(); onTransfer?.(); }}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onTransfer?.(); } }}
+                        style={{
+                            position: 'absolute',
+                            top: '-6px',
+                            left: '-6px',
+                            width: '20px',
+                            height: '20px',
+                            borderRadius: '50%',
+                            background: '#f59e0b',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            zIndex: 10,
+                            boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
+                        }}
+                    >
+                        <CrownOutlined style={{ color: '#fff', fontSize: 10 }} />
                     </div>
+                </Tooltip>
+            )}
+
+            {/* Kick button */}
+            {canKick && (
+                <Tooltip title={`Remover ${username}`}>
+                    <div
+                        role="button"
+                        tabIndex={0}
+                        aria-label={`Remover ${username} da sala`}
+                        onClick={(e) => { e.stopPropagation(); onKick?.(); }}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onKick?.(); } }}
+                        style={{
+                            position: 'absolute',
+                            top: '-6px',
+                            right: '-6px',
+                            width: '20px',
+                            height: '20px',
+                            borderRadius: '50%',
+                            background: '#ef4444',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            zIndex: 10,
+                            boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
+                        }}
+                    >
+                        <CloseOutlined style={{ color: '#fff', fontSize: 10 }} />
+                    </div>
+                </Tooltip>
+            )}
+
+            {/* Perspective wrapper */}
+            <div style={{ perspective: '800px' }}>
+                <div
+                    aria-hidden="true"
+                    style={{
+                        width: '72px',
+                        height: '104px',
+                        position: 'relative',
+                        transformStyle: 'preserve-3d',
+                        transition: `transform 0.55s cubic-bezier(0.4, 0, 0.2, 1) ${revealDelay}ms`,
+                        transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
+                    }}
+                >
+
+                    {/* Face down — card back */}
                     <div style={{
-                        width: '100%',
-                        height: '100%',
-                        position: 'absolute',
-                        backfaceVisibility: 'hidden',
-                        transform: 'rotateY(180deg)'
+                        ...faceBase,
+                        background: color,
+                        backgroundImage: `repeating-linear-gradient(
+                            45deg,
+                            rgba(255,255,255,0.07) 0px,
+                            rgba(255,255,255,0.07) 2px,
+                            transparent 2px,
+                            transparent 14px
+                        )`,
+                        border: '2px solid rgba(255,255,255,0.18)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px',
+                        opacity: connected ? 1 : 0.4,
+                    }}>
+                        {hasVoted ? (
+                            <CheckOutlined style={{ color: 'rgba(255,255,255,0.95)', fontSize: 26 }} />
+                        ) : (
+                            <div style={{
+                                width: '28px',
+                                height: '28px',
+                                borderRadius: '50%',
+                                border: '2px dashed rgba(255,255,255,0.45)',
+                            }} />
+                        )}
+                    </div>
+
+                    {/* Face up — vote value */}
+                    <div style={{
+                        ...faceBase,
+                        background: '#ffffff',
+                        border: '2px solid #e2e8f0',
+                        transform: 'rotateY(180deg)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
                     }}>
                         <div style={{
-                            color: 'black',
                             position: 'absolute',
-                            zIndex: 1,
-                            fontSize: 32,
-                            top: '50%',
-                            left: '50%',
-                            transform: 'translate(-50%, -50%)',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            height: '5px',
+                            background: color,
+                            borderRadius: '8px 8px 0 0',
+                        }} />
+                        <span style={{
+                            fontSize: '26px',
+                            fontWeight: 800,
+                            color: '#1e293b',
+                            letterSpacing: '-1px',
                         }}>
                             {vote}
-                        </div>
-                        <svg
-                            width="253"
-                            height="348"
-                            viewBox="0 0 253 348"
-                            style={{ ...baseImgStyle, color }}
-                            xmlns="http://www.w3.org/2000/svg"
-                        >
-                            <rect width="253" height="348" rx="40" fill="none" stroke="currentColor" strokeWidth="7" />
-                        </svg>
+                        </span>
                     </div>
+
                 </div>
             </div>
+
+            {/* Username */}
+            <Tooltip title={`${username}${isOwner ? ' (lider)' : ''}`}>
+                <div style={{
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    color: connected ? '#64748b' : '#cbd5e1',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    maxWidth: '72px',
+                    textAlign: 'center',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '2px',
+                }}>
+                    {isOwner && <CrownOutlined style={{ fontSize: 10, color: '#f59e0b' }} />}
+                    {username}
+                </div>
+            </Tooltip>
         </div>
     );
-}
+};
 
 export default UserCard;

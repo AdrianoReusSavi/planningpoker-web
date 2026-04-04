@@ -1,14 +1,19 @@
-import { Button, Input } from "antd";
+import { Button, Input, message } from "antd";
 import { useEffect, useState } from "react";
 import { useConnection } from "../../context/ConnectionContext";
+import { useRoom } from "../../context/RoomContext";
 
 interface EnterRoomProps {
     roomId: string;
+    onGoToCreate: () => void;
 }
 
-const EnterRoom: React.FC<EnterRoomProps> = ({ roomId }) => {
-    const { connection } = useConnection();
+const EnterRoom: React.FC<EnterRoomProps> = ({ roomId, onGoToCreate }) => {
+    const [messageApi, contextHolder] = message.useMessage();
+    const { connection, connected } = useConnection();
+    const { setPlayerId } = useRoom();
     const [username, setUsername] = useState<string>('');
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         if (username) {
@@ -25,21 +30,29 @@ const EnterRoom: React.FC<EnterRoomProps> = ({ roomId }) => {
     const enterRoom = async () => {
         if (!connection || !username || !roomId) return;
 
-        await connection.invoke('EnterRoom', roomId, username);
-    };
-
-    const watchRoom = async () => {
-        if (!connection || !username || !roomId) return;
-
-        await connection.invoke('WatchRoom', roomId, username);
+        setLoading(true);
+        try {
+            const playerId = await connection.invoke<string>('EnterRoom', roomId, username);
+            if (playerId) {
+                setPlayerId(playerId);
+            } else {
+                messageApi.error("Sala nao encontrada. Verifique o link e tente novamente.");
+            }
+        } catch {
+            messageApi.error("Erro de conexao. Verifique sua internet e tente novamente.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
         <div>
+            {contextHolder}
             <Input
                 placeholder="Seu nome"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
+                onPressEnter={enterRoom}
                 style={{ marginBottom: '10px' }}
             />
             <Input.Password
@@ -54,19 +67,18 @@ const EnterRoom: React.FC<EnterRoomProps> = ({ roomId }) => {
                     color="primary"
                     variant="solid"
                     onClick={enterRoom}
+                    loading={loading}
                     style={{ marginRight: "20px" }}
-                    disabled={!roomId || !username || !connection}
+                    disabled={!roomId || !username || !connected}
                 >
                     Entrar na Sala
                 </Button>
                 <Button
                     block
-                    color="cyan"
-                    variant="solid"
-                    onClick={watchRoom}
-                    disabled={!roomId || !username || !connection}
+                    variant="outlined"
+                    onClick={onGoToCreate}
                 >
-                    Assistir
+                    Criar nova sala
                 </Button>
             </div>
         </div>
