@@ -40,7 +40,7 @@ const FlipCard: React.FC = () => {
     const handleVisibility = () => {
       if (document.visibilityState === 'visible') {
         if (!intervalRef.current) {
-          intervalRef.current = window.setInterval(flipCard, 1200);
+          intervalRef.current = window.setInterval(() => flipCard.current(), 1200);
         }
       } else {
         if (intervalRef.current) {
